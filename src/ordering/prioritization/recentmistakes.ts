@@ -18,9 +18,23 @@ function newRecentMistakesFirstSorter (): CardOrganizer {
      * @return The ordered cards.
      */
     reorganize: function (cards: CardStatus[]): CardStatus[] {
-      return []
-    }
-  }
+      return [...cards].sort((a, b) => {
+        // Ensure there are results for each card
+        const resultsA = a.getResults() || [];
+        const resultsB = b.getResults() || [];
+
+        // Find the index of the last incorrect answer, or -1 if no incorrect answers
+        const lastMistakeA = Math.max(...resultsA.map((result, index) => result === false ? index : -1));
+        const lastMistakeB = Math.max(...resultsB.map((result, index) => result === false ? index : -1));
+
+        // Log the sorting process (for debugging purposes)
+        console.log(`Sorting: ${a.getCard().getQuestion()} (last mistake: ${lastMistakeA}) vs ${b.getCard().getQuestion()} (last mistake: ${lastMistakeB})`);
+
+        // Return the sorted result based on the most recent mistake
+        return lastMistakeB - lastMistakeA; // Higher mistakes (more recent) come first
+      });
+    }    
+  };
 };
 
 export { newRecentMistakesFirstSorter }
